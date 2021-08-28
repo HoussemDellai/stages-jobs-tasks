@@ -1,61 +1,13 @@
-trigger:
-- main
-
-pool:
-  vmImage: ubuntu-latest
-
 stages:
-- stage: BuildApp
-  displayName: Build Apps
-  jobs:
-  - job: BuildFrontendApp
-    displayName: Build Frontend App
-    steps:
-    - script: echo building frontend app
-      displayName: build frontend app
-    - script: echo running unit tests for frontend app
-      displayName: unit tests frontend
+- stage: Test
 
-  - job: BuildBackendApp
-    displayName: Build Backend App
-    steps:
-    - script: echo building backend app
-      displayName: build backend app
-    - script: echo running unit tests for backend app
-      displayName: unit tests backend
+- stage: DeployUS1
+  dependsOn: Test    # this stage runs after Test
 
-- stage: DeployDev
-  dependsOn: []
-  displayName: Deploy to DEV environment
-  jobs:
-  - job: DeployFrontendDev
-    displayName: Deploy frontend to DEV
-    steps:
-    - script: echo deploying frontend app to DEV
-      displayName: deploy frontend app to DEV
+- stage: DeployUS2
+  dependsOn: Test    # this stage runs in parallel with DeployUS1, after Test
 
-  - job: DeployBackendDev
-    displayName: Deploy backend to DEV
-    steps:
-    - script: echo deploying backend app to DEV
-      displayName: deploy backend app to DEV
-
-- stage: DeployProd
-  dependsOn: []
-  displayName: Deploy to PROD environment
-  pool:
-    vmImage: 'macOS-10.14'
-  jobs:
-  - job: DeployFrontendProd
-    displayName: Deploy frontend to PROD
-    steps:
-    - script: echo deploying frontend app to PROD
-      displayName: deploy frontend app to PROD
-
-  - job: DeployBackendProd
-    displayName: Deploy backend to PROD
-    pool:
-      vmImage: 'vs2017-win2016'
-    steps:
-    - script: echo deploying backend app to PROD
-      displayName: deploy backend app to PROD
+- stage: DeployEurope
+  dependsOn:         # this stage runs after DeployUS1 and DeployUS2
+  - DeployUS1
+  - DeployUS2
