@@ -5,30 +5,55 @@ pool:
   vmImage: ubuntu-latest
 
 stages:
-- stage: StageA
+- stage: BuildApp
+  displayName: Build Apps
   jobs:
-  - job: JobA
+  - job: BuildFrontendApp
+    displayName: Build Frontend App
     steps:
-    - script: |
-        echo "This is job Foo."
-        echo "##vso[task.setvariable variable=doThing;isOutput=true]Yes" #The variable doThing is set to Yes
-      name: DetermineResult
-    - script: echo $(DetermineResult.doThing)
-      name: echovar
-  - job: JobA_2
-    dependsOn: JobA
-    condition: eq(dependencies.JobA.outputs['DetermineResult.doThing'], 'Yes')
+    - script: echo building frontend app
+      displayName: build frontend app
+    - script: echo running unit tests for frontend app
+      displayName: unit tests frontend
+
+  - job: BuildBackendApp
+    displayName: Build Backend App
     steps:
-    - script: |
-        echo "This is job Bar."
-#job JB from stage B runs if DetermineResult task set doThing variable n stage A
-- stage: StageB
-  dependsOn: StageA
+    - script: echo building backend app
+      displayName: build backend app
+    - script: echo running unit tests for backend app
+      displayName: unit tests backend
+
+- stage: DeployDev
+  displayName: Deploy to DEV environment
   jobs:
-  - job: JobB
-    condition: eq(stageDependencies.StageA.JobA.outputs['DetermineResult.doThing'], 'Yes') #map doThing and check if true
-    variables:
-      varFromStageA: $[ stageDependencies.StageA.JobA.outputs['DetermineResult.doThing'] ]
+  - job: DeployFrontendDev
+    displayName: Deploy frontend to DEV
     steps:
-    - bash: echo "Hello world stage B first job"
-    - script: echo $(varFromStageA)
+    - script: echo deploying frontend app to DEV
+      displayName: deploy frontend app to DEV
+
+  - job: DeployBackendDev
+    displayName: Deploy backend to DEV
+    steps:
+    - script: echo deploying backend app to DEV
+      displayName: deploy backend app to DEV
+
+- stage: DeployProd
+  displayName: Deploy to PROD environment
+  pool:
+    vmImage: 'macOS-10.14'
+  jobs:
+  - job: DeployFrontendProd
+    displayName: Deploy frontend to PROD
+    steps:
+    - script: echo deploying frontend app to PROD
+      displayName: deploy frontend app to PROD
+
+  - job: DeployBackendProd
+    displayName: Deploy backend to PROD
+    pool:
+      vmImage: 'vs2017-win2016'
+    steps:
+    - script: echo deploying backend app to PROD
+      displayName: deploy backend app to PROD
