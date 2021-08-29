@@ -10,14 +10,14 @@ stages:
 - stage: DeployUS1
   dependsOn: Test    # this stage runs after Test
   jobs:
-  - job: deploy-us1
+  - job: deploy_us1
     steps:
     - script: echo deploying to US1
 
 - stage: DeployUS2
   dependsOn: Test    # this stage runs in parallel with DeployUS1, after Test
   jobs:
-  - job: deploy-us2
+  - job: deploy_us2
     steps:
     - script: echo deploying to US2
 
@@ -26,6 +26,6 @@ stages:
   - DeployUS1
   - DeployUS2
   jobs:
-  - job: deploy-europe
+  - job: deploy_europe
     steps:
     - script: echo deploying to Europe
