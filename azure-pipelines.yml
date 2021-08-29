@@ -11,18 +11,21 @@ stages:
     - script: echo testing app
 
 - stage: DeployUS1   # this stage runs after Test
+  dependsOn: []
   jobs:
   - job: deploy_us1
     steps:
     - script: echo deploying to US1
 
 - stage: DeployUS2   # this stage runs after DeployUS1
+  dependsOn: []
   jobs:
   - job: deploy_us2
     steps:
     - script: echo deploying to US2
 
 - stage: DeployEurope # this stage runs after DeployUS2
+  dependsOn: []
   jobs:
   - job: deploy_europe
     steps:
