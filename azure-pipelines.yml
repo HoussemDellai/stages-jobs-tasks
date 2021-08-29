@@ -5,9 +5,9 @@ pool:
   vmImage: ubuntu-latest
 
 stages:
-- stage: A
+- stage: StageA
   jobs:
-  - job: JA
+  - job: JobA
     steps:
     - script: |
         echo "This is job Foo."
@@ -15,20 +15,20 @@ stages:
       name: DetermineResult
     - script: echo $(DetermineResult.doThing)
       name: echovar
-  - job: JA_2
-    dependsOn: JA
-    condition: eq(dependencies.JA.outputs['DetermineResult.doThing'], 'Yes')
+  - job: JobA_2
+    dependsOn: JobA
+    condition: eq(dependencies.JobA.outputs['DetermineResult.doThing'], 'Yes')
     steps:
     - script: |
         echo "This is job Bar."
 #job JB from stage B runs if DetermineResult task set doThing variable n stage A
-- stage: B
-  dependsOn: A
+- stage: StageB
+  dependsOn: StageA
   jobs:
-  - job: JB
-    condition: eq(stageDependencies.A.JA.outputs['DetermineResult.doThing'], 'Yes') #map doThing and check if true
+  - job: JobB
+    condition: eq(stageDependencies.StageA.JobA.outputs['DetermineResult.doThing'], 'Yes') #map doThing and check if true
     variables:
-      varFromStageA: $[ stageDependencies.A.JA.outputs['DetermineResult.doThing'] ]
+      varFromStageA: $[ stageDependencies.StageA.JobA.outputs['DetermineResult.doThing'] ]
     steps:
     - bash: echo "Hello world stage B first job"
     - script: echo $(varFromStageA)
