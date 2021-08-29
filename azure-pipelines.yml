@@ -1,61 +1,31 @@
-trigger:
-- main
-
 pool:
   vmImage: ubuntu-latest
-
 stages:
-- stage: BuildApp
-  displayName: Build Apps
+- stage: Test
   jobs:
-  - job: BuildFrontendApp
-    displayName: Build Frontend App
+  - job: test
     steps:
-    - script: echo building frontend app
-      displayName: build frontend app
-    - script: echo running unit tests for frontend app
-      displayName: unit tests frontend
+    - script: echo testing app
 
-  - job: BuildBackendApp
-    displayName: Build Backend App
-    steps:
-    - script: echo building backend app
-      displayName: build backend app
-    - script: echo running unit tests for backend app
-      displayName: unit tests backend
-
-- stage: DeployDev
-  dependsOn: []
-  displayName: Deploy to DEV environment
+- stage: DeployUS1
+  dependsOn: Test    # this stage runs after Test
   jobs:
-  - job: DeployFrontendDev
-    displayName: Deploy frontend to DEV
+  - job: deploy-us1
     steps:
-    - script: echo deploying frontend app to DEV
-      displayName: deploy frontend app to DEV
+    - script: echo deploying to US1
 
-  - job: DeployBackendDev
-    displayName: Deploy backend to DEV
-    steps:
-    - script: echo deploying backend app to DEV
-      displayName: deploy backend app to DEV
-
-- stage: DeployProd
-  dependsOn: []
-  displayName: Deploy to PROD environment
-  pool:
-    vmImage: 'macOS-10.14'
+- stage: DeployUS2
+  dependsOn: Test    # this stage runs in parallel with DeployUS1, after Test
   jobs:
-  - job: DeployFrontendProd
-    displayName: Deploy frontend to PROD
+  - job: deploy-us2
     steps:
-    - script: echo deploying frontend app to PROD
-      displayName: deploy frontend app to PROD
+    - script: echo deploying to US2
 
-  - job: DeployBackendProd
-    displayName: Deploy backend to PROD
-    pool:
-      vmImage: 'vs2017-win2016'
+- stage: DeployEurope
+  dependsOn:         # this stage runs after DeployUS1 and DeployUS2
+  - DeployUS1
+  - DeployUS2
+  jobs:
+  - job: deploy-europe
     steps:
-    - script: echo deploying backend app to PROD
-      displayName: deploy backend app to PROD
+    - script: echo deploying to Europe
