@@ -1,34 +1,34 @@
 trigger:
 - main
+
 pool:
   vmImage: ubuntu-latest
 
 stages:
-- stage: Test
+- stage: A
   jobs:
-  - job: test
+  - job: JA
     steps:
-    - script: echo testing app
-
-- stage: DeployUS1   # this stage runs after Test
-  dependsOn: Test
+    - script: |
+        echo "This is job Foo."
+        echo "##vso[task.setvariable variable=doThing;isOutput=true]Yes" #The variable doThing is set to Yes
+      name: DetermineResult
+    - script: echo $(DetermineResult.doThing)
+      name: echovar
+  - job: JA_2
+    dependsOn: JA
+    condition: eq(dependencies.JA.outputs['DetermineResult.doThing'], 'Yes')
+    steps:
+    - script: |
+        echo "This is job Bar."
+#job JB from stage B runs if DetermineResult task set doThing variable n stage A
+- stage: B
+  dependsOn: A
   jobs:
-  - job: deploy_us1
+  - job: JB
+    condition: eq(stageDependencies.A.JA.outputs['DetermineResult.doThing'], 'Yes') #map doThing and check if true
+    variables:
+      varFromStageA: $[ stageDependencies.A.JA.outputs['DetermineResult.doThing'] ]
     steps:
-    - script: echo deploying to US1
-
-- stage: DeployUS2   # this stage runs after DeployUS1
-  dependsOn: Test
-  jobs:
-  - job: deploy_us2
-    steps:
-    - script: echo deploying to US2
-
-- stage: DeployEurope # this stage runs after DeployUS2
-  dependsOn: 
-  - DeployUS1
-  - DeployUS2
-  jobs:
-  - job: deploy_europe
-    steps:
-    - script: echo deploying to Europe
+    - bash: echo "Hello world stage B first job"
+    - script: echo $(varFromStageA)
